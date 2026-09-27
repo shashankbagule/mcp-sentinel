@@ -4,7 +4,7 @@ An automated security-testing agent that pentests **other AI agents and MCP (Mod
 
 Built entirely in [n8n](https://n8n.io), using a Claude/GPT-powered reasoning agent for triage and reporting.
 
-> Part of my security research portfolio: [shashankbagule.github.io](https://shashankbagule.github.io) — see the [MCP-Sentinel write-up](https://shashankbagule.github.io/#projects) for the full story of how this was built and validated.
+> Part of my security research portfolio: [shashankbagule.github.io](https://shashankbagule.github.io) — see the [MCP-Sentinel write-up](https://shashankbagule.github.io/#projects) and a [real sample scan report](https://shashankbagule.github.io/writeups/mcp-sentinel-report.html) for the full story of how this was built and validated.
 
 ## What it does
 
@@ -26,9 +26,11 @@ A **Scope Guardrail** node hard-blocks any target not on an explicit allow-list,
 
 ## Reporting
 
-Findings from every check are merged, deduplicated, and handed to a **Reasoning & Triage** agent that assigns each one a severity (Info → Critical) and a real-vulnerability-vs-expected-behavior verdict. A second **Report Generator** agent turns that into a clean Markdown disclosure-style report — executive summary, findings table, closing notes — as a downloadable `.md` file.
+Findings from every check are merged, deduplicated, and handed to a **Reasoning & Triage** agent that assigns each one a severity (Info → Critical) and a real-vulnerability-vs-expected-behavior verdict. A second **Report Generator** agent turns that into a clean Markdown disclosure-style report — executive summary, findings table, closing notes.
 
 Scans are also saved to a data table, so each new run includes a **regression analysis**: what's new, what's resolved, and what's persistent since the last scan of that target.
+
+You can see an unedited example of this output on a real scan here: **[sample security report →](https://shashankbagule.github.io/writeups/mcp-sentinel-report.html)**
 
 ## Validation
 
@@ -36,17 +38,11 @@ This isn't just theoretical — I ran it against:
 - A self-built "MCP Test Target" to develop and debug each check
 - A real external MCP server with a deliberately planted flaw (a tool that claimed to be read-only but silently deleted data) — MCP-Sentinel correctly produced a clean baseline report before the flaw was introduced, and a correctly-flagged high-severity report after
 
-## Setup
+## Status
 
-This is an n8n workflow export (`mcp-sentinel.json`), not a standalone script. To run it:
+MCP-Sentinel is an active project I'm moving toward a hosted product, so the n8n workflow itself (nodes, prompts, scoring logic) is currently kept private rather than published here. This repo exists to document the architecture and approach for my security research portfolio.
 
-1. Import `mcp-sentinel.json` into your own n8n instance (Workflows → Import from File)
-2. Edit the **Scope Guardrail** node's `allowedTargets` array to list only the MCP server(s) you're authorized to test
-3. Attach your own OpenAI credential to the `OpenAI Chat Model`, `OpenAI Chat Model1`, and `Injection Test Model` nodes (any LangChain-compatible chat model works)
-4. If you want scan history/regression analysis, create an n8n Data Table with columns `target_url`, `scanned_at`, `finding_summary`, and point the `Get Previous Scan` / `Save Scan To History` nodes at it
-5. Run the workflow manually, or wire it to a trigger of your choice
-
-All credential IDs, instance URLs, and data table IDs in this export are placeholders — you'll need to fill in your own before it runs.
+If you'd like to see it running against your own MCP server, talk through the architecture, or discuss early access, reach out — details below.
 
 ## Why I built this
 
